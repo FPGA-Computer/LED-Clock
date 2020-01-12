@@ -1,4 +1,5 @@
 This is an accurate 6 digitals clock (HH.MM.SS) for the STM8S003.
+
 Details: https://hw-by-design.blogspot.com/2019/11/stm8-led-clock-part-1.html
 
 The RTC is implemented in firmware. It uses a 24-bit numerically-controlled 
@@ -8,6 +9,7 @@ Mine has been calibrated to within +/- 1 sec/month
 (room temperature is regulated by heaters.)
 
 Hardware/ - Eagle CAD schematic, PCB
+
 Firmware/ - STM8S003 firmware source code
 
 Firmware written by me are licensed under GPL 3.0.
