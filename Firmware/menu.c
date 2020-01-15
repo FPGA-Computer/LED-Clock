@@ -48,7 +48,7 @@ const UI_Menu_t TimeSetMenu =
 // date: WW.DD.MM
 const UI_Item_t Date_Setting[]=
 {
-	{&Set0,&SetModified,S_DAY_COL,2,1,32,D_U8},
+	{&Set0,&SetModified,S_DAY_COL,2,1,31,D_U8},
 	{&Set1,&SetModified,S_MONTH_COL,2,1,12,D_U8},
 	{&Set2,&SetModified,S_YEAR_COL,2,0,99,D_U8Z}
 };
