@@ -29,9 +29,14 @@ typedef struct
 	uint8_t hour;
 	uint8_t min;
 	uint8_t	sec;
+	uint8_t dayofweek;
+	uint8_t	day;	
+	uint8_t	month;
+	uint16_t	year;
+
 //	uint16_t al_length1;
 //	uint16_t al_length2;
-} time_hms_t;
+} rtc_t;
 
 typedef struct
 {
@@ -43,14 +48,16 @@ typedef struct
 } nv_setting_t;
 
 extern volatile uint8_t time_flag,ticks;
-extern volatile time_hms_t time;
+extern volatile rtc_t time;
 extern volatile uint16_t countdown;
 extern volatile nv_setting_t Setting;
 
 void Time_Init(void);
 void Timer_Reload(void);
 void RTC(void);
-void SetTime(uint8_t Hour, uint8_t Min, uint8_t Sec);
+uint8_t MonthDays(uint8_t month, uint16_t year);
+void RTC_SetTime(uint8_t Hour, uint8_t Min, uint8_t Sec);
+void RTC_SetDate(uint8_t Day, uint8_t Month, uint16_t Year);
 
 // TIM: 12MHz/(20*60000) = 10Hz, 100ms
 

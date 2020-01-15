@@ -20,5 +20,10 @@ Hardware is licensed under CC BY-4.0
 
 https://creativecommons.org/licenses/by/4.0/
 
+History:
+
 Initial release:
 - bare minimal functionality, clock trim value is hard coded.
+
+0.1 release
+- added calendar

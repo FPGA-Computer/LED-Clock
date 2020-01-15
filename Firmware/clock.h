@@ -27,19 +27,13 @@
 enum _ClockMode
 {
 	Mode_Clock,
+	Mode_Calendar,
 	Mode_Last
 };
 
-typedef struct
-{
-	FuncPtr Mode;
-	FuncPtr Mode_Setting;
-	FuncPtr *AltModes;
-	uint8_t	Alt;
-	uint8_t flag;
-} Clock_Modes_t;
+extern uint8_t Clock_Mode, ModeRefresh;
 
 void ClockApp(void);
 void DisplayClock(void);
-
+void DisplayDate(void);
 #endif

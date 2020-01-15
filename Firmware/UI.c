@@ -47,7 +47,7 @@ void PrintHex24(uint32_t N)
 }
 #endif
 
-void Print2d(int16_t Number,uint8_t Pos)
+void UI_Print2d(int16_t Number,uint8_t Pos)
 {
 	uint8_t ZeroSup = Pos & ZERO_SUP;
 	uint16_t Digit;
@@ -68,12 +68,24 @@ void Print2d(int16_t Number,uint8_t Pos)
 	Display[Pos] = CharMap[Digit];	
 }
 
-void Print_Hr(uint8_t hour,uint8_t display_opt)
+void UI_Print_Str(uint8_t *str,uint8_t x)
+{
+	for(;x<=COLUMN_MAX;)
+		Display[x++] = *str++;
+}
+
+void UI_Fill(uint8_t ch, uint8_t x,uint8_t width)
+{
+	for(;width && (x<=COLUMN_MAX);width--)
+		Display[x++] = ch;
+}
+
+void UI_Print_Hr(uint8_t hour,uint8_t display_opt)
 {
 	uint8_t am=0;
 	
 	if(display_opt & DISPLAY_24H)
-		Print2d(hour,HR_COL);
+		UI_Print2d(hour,HR_COL);
 	else
 	{
 		if(hour<12)
@@ -84,35 +96,34 @@ void Print_Hr(uint8_t hour,uint8_t display_opt)
 		if(!hour)
 			hour=12;
 
-		Print2d(hour,HR_COL|ZERO_SUP);
+		UI_Print2d(hour,HR_COL|ZERO_SUP);
 		Display[HR_COL]|=am?AM_SEG:PM_SEG;
 	}
 }
 
-void Print_Time(time_hms_t *time,uint8_t display_opt)
+void UI_Print_Time(rtc_t *time,uint8_t display_opt)
 {
-	Print_Hr(time->hour,display_opt);
+	UI_Print_Hr(time->hour,display_opt);
 		
 	Display[HR_COL+1]|=SEP_SEG;
-	Print2d(time->min,MIN_COL);
+	UI_Print2d(time->min,MIN_COL);
 
 	if(display_opt & DISPLAY_SEC)
 	{	
 		Display[MIN_COL+1]|=SEP_SEG;
-		Print2d(time->sec,SEC_COL);
+		UI_Print2d(time->sec,SEC_COL);
 	}
 }
-
-void Display_Cursor(uint8_t x,uint8_t width)
+const uint8_t DayofWeek[] = 
+{ Ch_S,Ch_u,0, Ch_M1,Ch_M2,0, Ch_T,Ch_u,0, Ch_W1,Ch_W2,0, 
+	Ch_T,Ch_h,0, Ch_F,Ch_r,0, Ch_S,Ch_A,0
+};
+																
+void UI_Print_Date(rtc_t *time)
 {
-	for(;width && (x<=COLUMN_MAX);width--)
-		Display[x++] = CURSOR_SEG;
-}
-
-void ItemClear(uint8_t x, uint8_t width)
-{
-	for(;width && (x<=COLUMN_MAX);width--)
-		Display[x++] = 0;
+	UI_Print_Str(&DayofWeek[time->dayofweek*3],DOW_COL);
+	UI_Print2d(time->day,DAY_COL|ZERO_SUP);
+	UI_Print2d(time->month,MONTH_COL|ZERO_SUP);
 }
 
 void UI_PrintItem(UI_Item_t *Item, uint8_t Disp)
@@ -125,26 +136,31 @@ void UI_PrintItem(UI_Item_t *Item, uint8_t Disp)
 		switch(Item->Flags &  DISPLAY_MASK)
 		{
 			case D_HR:
-				Print_Hr(*(uint8_t*)Item->Value,0);
+				UI_Print_Hr(*(uint8_t*)Item->Value,0);
 				break;
 			case D_U8:
-				Print2d(*(uint8_t*)Item->Value,x|ZERO_SUP);
+				UI_Print2d(*(uint8_t*)Item->Value,x|ZERO_SUP);
 				break;				
 			case D_U8Z:
-				Print2d(*(uint8_t*)Item->Value,x);
+				UI_Print2d(*(uint8_t*)Item->Value,x);
 				break;
-			case D_SetExit:
-				UI_PrintItems((UI_Menu_t *)Item->Value);
+/*			case D_Str:
+				UI_Print_Str((uint8_t*)Item->Value,x);		
 				break;
+*/
+
 /*				
 			case D_CustomData:
 				((FuncPtr_arg)Item->Modified)(Item);
 				break;
 */
+			case D_SetExit:
+				UI_PrintItems((UI_Menu_t *)Item->Value);
+				break;
 		}
 	}
 	else
-		ItemClear(x,width);
+		UI_Fill(0,x,width);
 }
 
 void UI_PrintItems(UI_Menu_t *Menu)
@@ -228,7 +244,7 @@ uint8_t UI_EditItem(UI_Item_t *Item)
 				if(time_flag & TIME_FULL_SEC)
 					UI_PrintItem(Item,1);
 				else
-					Display_Cursor(Item->X,Item->Width);
+					UI_Fill(CURSOR_SEG,Item->X,Item->Width);
 
 			time_flag &= ~(TIME_HALF_SEC|TIME_FULL_SEC);
 		}		
@@ -324,6 +340,6 @@ uint8_t UI_Menu(UI_Menu_t *Menu)
 	} while (!Quit);
 	
 	Key_Purge();
-	ItemClear(0,COLUMN_MAX);
+	UI_Fill(0,0,COLUMN_MAX);
 	return(Modified);
 }

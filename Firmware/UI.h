@@ -50,16 +50,20 @@ typedef void (*FuncPtr_arg)(void *);
 
 #define UI_LARGE_STEP		10
 
-enum DataFlags_ { D_HR, D_U8, D_U8Z, D_SetExit
-/*, D_Chars, D_Menu, D_Function, D_CustomData */ };
+enum DataFlags_ { D_HR, D_U8, D_U8Z, D_Str, D_SetExit
+/*, D_Menu, D_Function, D_CustomData */ };
 
-#define DISPLAY_MASK	0x1f
-#define DISPLAY_ADJ		0x80
+#define DISPLAY_MASK		0x1f
+#define DISPLAY_ADJ			0x80
 
 void sec2ms(uint16_t time,uint8_t *min,uint8_t *sec);
-void Print2d(int16_t Number,uint8_t Pos);
-void Print_Hr(uint8_t hour,uint8_t display_opt);
-void Print_Time(time_hms_t *time,uint8_t display_sec);
+
+void UI_Print2d(int16_t Number,uint8_t Pos);
+void UI_Print_Str(uint8_t *str,uint8_t x);
+void UI_Fill(uint8_t ch, uint8_t x,uint8_t width);
+void UI_Print_Hr(uint8_t hour,uint8_t display_opt);
+void UI_Print_Time(rtc_t *time,uint8_t display_sec);
+void UI_Print_Date(rtc_t *time);
 void UI_PrintItems(UI_Menu_t *Menu);
 uint8_t UI_Menu(UI_Menu_t *Menu);
 
@@ -71,10 +75,20 @@ enum _Display_Options
 	DISPLAY_SEC=0x01, DISPLAY_24H = 0x02
 };
 
-
 #define HR_COL					0
 #define MIN_COL					2
 #define SEC_COL					4
+
+#define DOW_COL					0
+#define DAY_COL					2
+#define MONTH_COL				4
+
+// UI limits year to 2 digits
+#define CENTURY					2000
+
+#define S_DAY_COL				0
+#define S_MONTH_COL			2
+#define S_YEAR_COL			4
 
 //#define _AM_PM
 
@@ -86,8 +100,8 @@ enum _Display_Options
 	#define PM_SEG						SEG_F
 #endif
 
-#define SEP_SEG						SEG_DP
-#define CURSOR_SEG				SEG_D
+#define SEP_SEG							SEG_DP
+#define CURSOR_SEG					SEG_D
 
 /* 7 segment display
 
@@ -115,7 +129,7 @@ enum _7Seg_chars
 	Ch_8 = SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F|SEG_G,
 	Ch_9 =	SEG_A|SEG_B|SEG_C|SEG_D|      SEG_F|SEG_G,
 
-	Ch_A = 	SEG_A|SEG_B|SEG_C|      SEG_E|SEG_F      ,
+	Ch_A = 	SEG_A|SEG_B|SEG_C|      SEG_E|SEG_F|SEG_G,
 	Ch_B = 	            SEG_C|SEG_D|SEG_E|SEG_F|SEG_G,
 	Ch_C = 	SEG_A|            SEG_D|SEG_E|SEG_F      ,
 	Ch_D= 	      SEG_B|SEG_C|SEG_D|SEG_E|      SEG_G,
@@ -140,6 +154,11 @@ enum _7Seg_chars
 	Ch_W1= 	            SEG_C|SEG_D|SEG_E|SEG_F      ,
 	Ch_W2= 	      SEG_B|SEG_C|SEG_D|SEG_E            ,
 	Ch_Y = 	      SEG_B|SEG_C|SEG_D      |SEG_F|SEG_G,
+	
+	Ch_h = 	            SEG_C      |SEG_E|SEG_F|SEG_G,	
+	Ch_r = 	                        SEG_E      |SEG_G,
+	Ch_u = 	            SEG_C|SEG_D|SEG_E            ,	
+	
 	Ch_Neg = SEG_G
 };
 

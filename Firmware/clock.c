@@ -23,29 +23,33 @@
  
 #include "hardware.h"
 
-uint8_t Clock_Mode, Alt_Mode;
-Clock_Modes_t App_Mode[] =
-{
-	{DisplayClock,Set_Time,NULL,0,0}
-};
+uint8_t Clock_Mode, ModeRefresh;
 
 void ClockApp(void)
 {
 
 	uint8_t key = Key_Get();
 	
+	ModeRefresh=0;
+	
 	switch(key)
 	{
 		case KEY_INC:
 			if(Clock_Mode < Mode_Last-1)
+			{ 
 				Clock_Mode++;
+				ModeRefresh=1;
+			}
 			else
 				Clock_Mode = Mode_Clock;
 			break;
-			
+
 		case KEY_DEC:
 			if(Clock_Mode)
+			{
 			  Clock_Mode--;
+				ModeRefresh=1;
+			}
 			else
 				Clock_Mode = Mode_Last-1;
 			break;
@@ -59,15 +63,23 @@ void ClockApp(void)
 				
 			DisplayClock();
 			break;
+			
+		case Mode_Calendar:
+			if(key==(KEY_MENU|KEY_LONG))
+				Set_Date();
+				
+			DisplayDate();
+			break;
 	}
 }
 
 void DisplayClock(void)
 {
-	if(time_flag & TIME_SEC_FLAG)
+	if(ModeRefresh||(time_flag & TIME_SEC_FLAG))
 	{
+		ModeRefresh=0;	
 		time_flag &= ~TIME_SEC_FLAG;
-		Print_Time(&time,DISPLAY_SEC);
+		UI_Print_Time(&time,DISPLAY_SEC);
 	}
 	
 	// blink decimal point
@@ -81,3 +93,19 @@ void DisplayClock(void)
 			Display[MIN_COL+1]&=~SEP_SEG;
 	}
 }
+
+void DisplayDate(void)
+{
+	if(ModeRefresh||(time_flag & TIME_SEC_FLAG))
+	{
+		ModeRefresh=0;
+		time_flag &= ~TIME_SEC_FLAG;
+		
+		UI_Print_Date(&time);
+
+		Display[DOW_COL+1]|=SEP_SEG;
+		Display[DAY_COL+1]|=SEP_SEG;
+	}
+}
+
+		

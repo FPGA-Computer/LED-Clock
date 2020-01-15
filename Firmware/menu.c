@@ -22,36 +22,65 @@
  */ 
 #include "hardware.h"
 
-static time_hms_t TimeSetting;
-static uint8_t TimeModified;
+uint8_t Set0,Set1,Set2,SetModified;
 
-extern const UI_Menu_t SettingMenu;
+extern const UI_Menu_t TimeSetMenu;
 
-const UI_Item_t RTC_Setting[]=
+const UI_Item_t Time_Setting[]=
 {
-	{&TimeSetting.hour,&TimeModified,HR_COL,2,TIME_HR_MIN,TIME_HR_MAX,D_HR},
-	{&TimeSetting.min,&TimeModified,MIN_COL,2,0,59,D_U8Z},
-	{&TimeSetting.sec,&TimeModified,SEC_COL,2,0,59,D_U8Z},
-	{&SettingMenu,NULL,HR_COL,6,0,0,D_SetExit}
+	{&Set0,&SetModified,HR_COL,2,TIME_HR_MIN,TIME_HR_MAX,D_HR},
+	{&Set1,&SetModified,MIN_COL,2,0,59,D_U8Z},
+	{&Set2,&SetModified,SEC_COL,2,0,59,D_U8Z},
+	{&TimeSetMenu,NULL,HR_COL,6,0,0,D_SetExit}
 };
 
-const UI_Menu_t SettingMenu =
+const UI_Menu_t TimeSetMenu =
 {
-	NULL,0,RTC_Setting,sizeof(RTC_Setting)/sizeof(UI_Item_t)
+	NULL,0,Time_Setting,sizeof(Time_Setting)/sizeof(UI_Item_t)
+};
+
+#define CENTURY					2000
+
+#define S_DAY_COL				0
+#define S_MONTH_COL			2
+#define S_YEAR_COL			4
+
+// date: WW.DD.MM
+const UI_Item_t Date_Setting[]=
+{
+	{&Set0,&SetModified,S_DAY_COL,2,1,32,D_U8},
+	{&Set1,&SetModified,S_MONTH_COL,2,1,12,D_U8},
+	{&Set2,&SetModified,S_YEAR_COL,2,0,99,D_U8Z}
+};
+
+const UI_Menu_t DateSetMenu =
+{
+	NULL,0,Date_Setting,sizeof(Date_Setting)/sizeof(UI_Item_t)
 };
 
 void Set_Time(void)
 {
-	uint16_t countdown;
-	int8_t new_trim;
-	
-	TimeSetting.hour = time.hour;
-	TimeSetting.min = time.min;
-	TimeSetting.sec = 0;						// clear seconds
-	TimeModified = 0;
+	Set0 = time.hour;
+	Set1 = time.min;
+	Set2 = 0;						// clear seconds
+	SetModified = 0;
 
-	UI_Menu(&SettingMenu);
+	UI_Menu(&TimeSetMenu);
 	
-	if(TimeModified)
-		SetTime(TimeSetting.hour,TimeSetting.min,TimeSetting.sec);
+	if(SetModified)
+		RTC_SetTime(Set0,Set1,Set2);
 }
+
+void Set_Date(void)
+{
+	Set0 = time.day;
+	Set1 = time.month;
+	Set2 = time.year%100;	// stripped
+	SetModified = 0;
+
+	UI_Menu(&DateSetMenu);
+	
+	if(SetModified)
+		RTC_SetDate(Set0,Set1,Set2+CENTURY);
+}
+

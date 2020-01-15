@@ -25,5 +25,5 @@
 #define MENU_H_
 
 void Set_Time(void);
-
+void Set_Date(void);
 #endif

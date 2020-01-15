@@ -23,10 +23,11 @@
 #include "hardware.h"
 
 volatile uint8_t time_flag,ticks;
-volatile time_hms_t time;
+volatile rtc_t time;
 volatile nv_setting_t Setting;
 uint32_t DDS_PhaseInc;
 volatile uint32_t DDS_Accum;
+
 
 void Time_Init(void)
 {	// prescaler
@@ -45,6 +46,9 @@ void Time_Init(void)
 	TIM1->CR1 = TIM1_CR1_ARPE|TIM1_CR1_CEN;
 	// Update Interrupt
 	TIM1->IER = TIM1_IER_UIE;
+	
+	time.day = 1;
+	time.month = 1;	
 }
 
 // RTC
@@ -86,9 +90,30 @@ void Time_Init(void)
 					time.hour++;
 				}
 				if(time.hour > TIME_HR_MAX)
+				{
 					time.hour = TIME_HR_MIN;
+					
+					if(time.dayofweek < 7)
+						time.dayofweek++;
+					else
+						time.dayofweek = 0;
+					
+					if(time.day<MonthDays(time.month,time.year))
+						time.day++;
+					else
+					{
+						time.day = 1;
+						
+						if(time.month <12)
+							time.month++;
+						else
+						{
+							time.month = 1;
+							time.year++;
+						}
+					}
+				}
 			}
-			
 			time_flag |= TIME_SEC_FLAG|TIME_FULL_SEC;
 		}	
 	}
@@ -97,12 +122,55 @@ void Time_Init(void)
 	time_flag |= TIME_TICK;
 }
 
-void SetTime(uint8_t Hour, uint8_t Min, uint8_t Sec)
+void RTC_SetTime(uint8_t Hour, uint8_t Min, uint8_t Sec)
 {
 	sim();
 	time.hour =	Hour;
 	time.min =	Min;	
 	time.sec =	Sec;
 	ticks = TICKS_PER_SEC-1;
+	rim();
+}
+
+// starts at 1
+const uint8_t MonthDays_Tbl[]= { 0,31,28,31,30,31,30,31,31,30,31,30 };
+
+/* https://www.wikihow.com/Calculate-Leap-Years */
+uint8_t MonthDays(uint8_t month, uint16_t year)
+{
+	if(month !=2)
+	  return(MonthDays_Tbl[month]);
+	else
+	{
+		if(year%4)
+			return(28);
+		else if(year%100)
+			return(29);
+		else if(year%400)
+			return(28);
+		else			
+			return(29);
+	}
+}
+
+/*
+	https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week
+	Sakamoto's methods
+*/
+
+void RTC_SetDate(uint8_t Day, uint8_t Month, uint16_t Year)
+{	
+	const uint8_t t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+	uint8_t dayofweek;
+	uint16_t y;
+
+	y = Year - (Month < 3);
+	dayofweek = (y + y/4 - y/100 + y/400 + t[Month-1] + Day) % 7;	
+
+	sim();
+	time.dayofweek = dayofweek;
+	time.day = Day;
+	time.month = Month;	
+	time.year =	Year;
 	rim();
 }
