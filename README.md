@@ -27,3 +27,6 @@ Initial release:
 
 0.1 release
 - added calendar
+
+0.2 release
+- added North America Daylight Saving Time (DST) + code clean up

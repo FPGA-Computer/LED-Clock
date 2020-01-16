@@ -22,12 +22,10 @@
  */ 
 #include "hardware.h"
 
-volatile uint8_t time_flag,ticks;
 volatile rtc_t time;
-volatile nv_setting_t Setting;
+//volatile nv_setting_t Setting;
 uint32_t DDS_PhaseInc;
 volatile uint32_t DDS_Accum;
-
 
 void Time_Init(void)
 {	// prescaler
@@ -47,8 +45,7 @@ void Time_Init(void)
 	// Update Interrupt
 	TIM1->IER = TIM1_IER_UIE;
 	
-	time.day = 1;
-	time.month = 1;	
+	RTC_SetDate(1,1,YEAR_START);
 }
 
 // RTC
@@ -65,17 +62,17 @@ void Time_Init(void)
 	
 	if (DDS_Accum & DDS_CARRY)
 	{
-		if(ticks)
+		if(time.ticks)
 		{	
 			// blink decimal point
-			if(ticks==(TICKS_PER_SEC/2))
-				time_flag |= TIME_HALF_SEC;
+			if(time.ticks==(TICKS_PER_SEC/2))
+				time.HalfSec = 1;
 	
-			ticks--;
+			time.ticks--;
 		}
 		else
 		{
-			ticks = TICKS_PER_SEC-1;
+			time.ticks = TICKS_PER_SEC-1;
 	
 			time.sec++;
 			
@@ -88,6 +85,11 @@ void Time_Init(void)
 				{
 					time.min = 0;			
 					time.hour++;
+					
+					#ifdef DST
+						if(time.DST_Enable)	// check evry hour on the hour
+							DST_Check();
+					#endif	
 				}
 				if(time.hour > TIME_HR_MAX)
 				{
@@ -110,17 +112,102 @@ void Time_Init(void)
 						{
 							time.month = 1;
 							time.year++;
+							RTC_AnnualUpdate();
 						}
 					}
 				}
 			}
-			time_flag |= TIME_SEC_FLAG|TIME_FULL_SEC;
+			
+			time.SecFlag = 1;
+			time.FullSec = 1;
 		}	
 	}
 	
 	DDS_Accum &= DDS_MASK;
-	time_flag |= TIME_TICK;
+	time.Tick = 1;
 }
+
+/* https://www.wikihow.com/Calculate-Leap-Years */
+uint8_t LeapYear(uint8_t year)
+{
+	if(year%4)
+		return(0);
+	else if(year%100)
+		return(1);
+	else if(year%400)
+		return(0);
+	else			
+		return(1);
+}
+
+void RTC_AnnualUpdate(void)
+{
+	time.LeapYear=LeapYear(time.year);
+
+	#ifdef DST
+		if(time.DST_Enable)
+		{
+			uint8_t dayofweek;
+
+			dayofweek = DayWeek(1,DST_Start_Month,time.year);
+			time.DST_Start = 1+ 7*(DST_Start_Week-1) + dayofweek;
+			dayofweek = DayWeek(1,DST_End_Month,time.year);
+			time.DST_Stop = 1+ 7*(DST_End_Week-1) + dayofweek;
+		}
+	#endif		
+}
+
+// months starts at 1
+const uint8_t MonthDays_Tbl[]= { 0,31,28,31,30,31,30,31,31,30,31,30 };
+
+uint8_t MonthDays(uint8_t month, uint16_t year)
+{
+	if((month !=2)||!time.LeapYear)
+	  return(MonthDays_Tbl[month]);
+	else
+		return(29);
+}
+
+/*
+	https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week
+	Sakamoto's methods
+*/
+uint8_t DayWeek(uint8_t Day, uint8_t Month, uint16_t Year)
+{
+	const uint8_t t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+	uint16_t y;
+
+	y = Year - (Month < 3);
+	return ((y + y/4 - y/100 + y/400 + t[Month-1] + Day) % 7);
+}
+
+#ifdef DST
+
+void DST_Check(void)
+{
+	if(time.DST_Active)
+	{
+		if(	(time.month == DST_End_Month)&&
+				(time.day == time.DST_Stop)&&
+				(time.hour == DST_ChangeTime) )
+		{
+			time.hour --;
+			time.DST_Active = 0;
+		}
+	}
+	else
+	{
+		if(	(time.month == DST_Start_Month)&&
+				(time.day == time.DST_Start)&&
+				(time.hour == DST_ChangeTime) )
+		{
+			time.hour ++;
+			time.DST_Active = 1;
+		}
+	}
+}
+
+#endif		
 
 void RTC_SetTime(uint8_t Hour, uint8_t Min, uint8_t Sec)
 {
@@ -128,49 +215,20 @@ void RTC_SetTime(uint8_t Hour, uint8_t Min, uint8_t Sec)
 	time.hour =	Hour;
 	time.min =	Min;	
 	time.sec =	Sec;
-	ticks = TICKS_PER_SEC-1;
+	time.ticks = TICKS_PER_SEC-1;
 	rim();
 }
 
-// starts at 1
-const uint8_t MonthDays_Tbl[]= { 0,31,28,31,30,31,30,31,31,30,31,30 };
-
-/* https://www.wikihow.com/Calculate-Leap-Years */
-uint8_t MonthDays(uint8_t month, uint16_t year)
-{
-	if(month !=2)
-	  return(MonthDays_Tbl[month]);
-	else
-	{
-		if(year%4)
-			return(28);
-		else if(year%100)
-			return(29);
-		else if(year%400)
-			return(28);
-		else			
-			return(29);
-	}
-}
-
-/*
-	https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week
-	Sakamoto's methods
-*/
-
 void RTC_SetDate(uint8_t Day, uint8_t Month, uint16_t Year)
 {	
-	const uint8_t t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
 	uint8_t dayofweek;
-	uint16_t y;
 
-	y = Year - (Month < 3);
-	dayofweek = (y + y/4 - y/100 + y/400 + t[Month-1] + Day) % 7;	
-
+	dayofweek=DayWeek(Day,Month,Year);
 	sim();
 	time.dayofweek = dayofweek;
 	time.day = Day;
 	time.month = Month;	
 	time.year =	Year;
+	RTC_AnnualUpdate();
 	rim();
 }

@@ -85,6 +85,7 @@ enum _Display_Options
 
 // UI limits year to 2 digits
 #define CENTURY					2000
+#define YEAR_START			2020
 
 #define S_DAY_COL				0
 #define S_MONTH_COL			2
@@ -141,7 +142,7 @@ enum _7Seg_chars
 	Ch_J = 	      SEG_B|SEG_C|SEG_D|SEG_E            ,
 	Ch_L = 	                  SEG_D|SEG_E|SEG_F      ,
 	Ch_M1=	SEG_A|SEG_B            |SEG_E|SEG_F      ,
-	Ch_M2= 	SEG_A|SEG_B|SEG_C            |SEG_F      ,
+	Ch_M2= 	                        SEG_E|SEG_F      ,
 	Ch_N = 	SEG_A|SEG_B|SEG_C      |SEG_E|SEG_F      ,
 	Ch_O = 	            SEG_C|SEG_D|SEG_E      |SEG_G,
 	Ch_P = 	SEG_A|SEG_B            |SEG_E|SEG_F|SEG_G,	
@@ -152,7 +153,7 @@ enum _7Seg_chars
 	Ch_U = 	      SEG_B|SEG_C|SEG_D|SEG_E|SEG_F      ,
 	Ch_V = 	            SEG_C|SEG_D|SEG_E|SEG_F      ,
 	Ch_W1= 	            SEG_C|SEG_D|SEG_E|SEG_F      ,
-	Ch_W2= 	      SEG_B|SEG_C|SEG_D|SEG_E            ,
+	Ch_W2= 	                        SEG_E|SEG_F      ,
 	Ch_Y = 	      SEG_B|SEG_C|SEG_D      |SEG_F|SEG_G,
 	
 	Ch_h = 	            SEG_C      |SEG_E|SEG_F|SEG_G,	

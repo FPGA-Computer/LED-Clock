@@ -115,15 +115,16 @@ void UI_Print_Time(rtc_t *time,uint8_t display_opt)
 	}
 }
 const uint8_t DayofWeek[] = 
-{ Ch_S,Ch_u,0, Ch_M1,Ch_M2,0, Ch_T,Ch_u,0, Ch_W1,Ch_W2,0, 
+{ Ch_S,Ch_u,0, Ch_M1,Ch_M2,0, Ch_T,Ch_u,0, Ch_W1|SEG_DP,Ch_W2,0, 
 	Ch_T,Ch_h,0, Ch_F,Ch_r,0, Ch_S,Ch_A,0
 };
 																
+// print date: WW.DD.MM
 void UI_Print_Date(rtc_t *time)
 {
 	UI_Print_Str(&DayofWeek[time->dayofweek*3],DOW_COL);
 	UI_Print2d(time->day,DAY_COL|ZERO_SUP);
-	UI_Print2d(time->month,MONTH_COL|ZERO_SUP);
+	UI_Print2d(time->month,MONTH_COL);
 }
 
 void UI_PrintItem(UI_Item_t *Item, uint8_t Disp)
@@ -239,14 +240,15 @@ uint8_t UI_EditItem(UI_Item_t *Item)
 				break;
 		}
 
-		if(time_flag & (TIME_HALF_SEC|TIME_FULL_SEC))
+		if(time.HalfSec||time.FullSec)
 		{		
-				if(time_flag & TIME_FULL_SEC)
+				if(time.FullSec)
 					UI_PrintItem(Item,1);
 				else
 					UI_Fill(CURSOR_SEG,Item->X,Item->Width);
 
-			time_flag &= ~(TIME_HALF_SEC|TIME_FULL_SEC);
+			time.HalfSec = 0;
+			time.FullSec = 0;
 		}		
 
 		if(Update||Quit)
@@ -330,10 +332,11 @@ uint8_t UI_Menu(UI_Menu_t *Menu)
 		else
 		{
 			// blink
-			if(time_flag & (TIME_HALF_SEC|TIME_FULL_SEC))
+			if(time.HalfSec||time.FullSec)
 			{
-				UI_PrintItem(&Menu->Items[Item],time_flag & TIME_FULL_SEC);
-				time_flag &= ~(TIME_HALF_SEC|TIME_FULL_SEC);
+				UI_PrintItem(&Menu->Items[Item],time.FullSec);
+				time.HalfSec = 0;
+				time.FullSec = 0;
 			}	
 		}
 	

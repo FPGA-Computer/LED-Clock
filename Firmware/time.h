@@ -24,18 +24,32 @@
 #ifndef TIME_H_
 #define TIME_H_
 
+#define DST
+
 typedef struct
 {
-	uint8_t hour;
-	uint8_t min;
+	uint8_t	ticks;
 	uint8_t	sec;
-	uint8_t dayofweek;
+	uint8_t min;
+	uint8_t hour;
 	uint8_t	day;	
 	uint8_t	month;
-	uint16_t	year;
+	uint16_t year;
+	uint8_t dayofweek;
+	
+	uint8_t Tick:1;
+	uint8_t LeapYear:1;
+	uint8_t SecFlag:1;
+	uint8_t HalfSec:1;
+	uint8_t FullSec:1;
+	
+#ifdef DST	
+	uint8_t DST_Enable:1;	
+	uint8_t DST_Active:1;
+	uint8_t DST_Start;
+	uint8_t DST_Stop;
+#endif
 
-//	uint16_t al_length1;
-//	uint16_t al_length2;
 } rtc_t;
 
 typedef struct
@@ -44,18 +58,35 @@ typedef struct
 //	uint8_t al_min;
 //	uint16_t al_length1;
 //	uint16_t al_length2;
-	uint8_t clock_trim;
+	uint32_t DDS_Adj;
 } nv_setting_t;
 
-extern volatile uint8_t time_flag,ticks;
 extern volatile rtc_t time;
-extern volatile uint16_t countdown;
-extern volatile nv_setting_t Setting;
+//extern volatile uint16_t countdown;
+//extern volatile nv_setting_t Setting;
+
+
+
+// North America DST
+// https://www.timetemperature.com/northamerica/north_america_daylight_saving_time.shtml
+
+enum DST_
+{
+	DST_Start_Month = 3,
+	DST_Start_Week = 2,
+	DST_End_Month = 11,
+	DST_End_Week = 1,
+	DST_ChangeDay	= 0,			// Sunday (not used in code)
+	DST_ChangeTime = 2			// 2am
+};
 
 void Time_Init(void);
 void Timer_Reload(void);
 void RTC(void);
 uint8_t MonthDays(uint8_t month, uint16_t year);
+uint8_t DayWeek(uint8_t Day, uint8_t Month, uint16_t Year);
+void RTC_AnnualUpdate(void);
+void DST_Check(void);
 void RTC_SetTime(uint8_t Hour, uint8_t Min, uint8_t Sec);
 void RTC_SetDate(uint8_t Day, uint8_t Month, uint16_t Year);
 

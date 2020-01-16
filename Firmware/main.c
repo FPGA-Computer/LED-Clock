@@ -28,6 +28,8 @@ void main(void)
 	// load Setting
 	//	Load_Prefs(&Setting);
 	
+	time.DST_Enable = 1;
+	
 	Init_Hardware();
 
 	while(1)
@@ -35,9 +37,9 @@ void main(void)
 		if(!debugger)
 			wfi();				// save some extra power - doesn't work with debugger
 			
-		if((time_flag & TIME_TICK)&& power)
+		if((time.Tick)&& power)
 		{
-			time_flag &= ~TIME_TICK;
+			time.Tick=0;
 			ClockApp();
 		}
 	}

@@ -75,17 +75,17 @@ void ClockApp(void)
 
 void DisplayClock(void)
 {
-	if(ModeRefresh||(time_flag & TIME_SEC_FLAG))
+	if(ModeRefresh||(time.SecFlag))
 	{
 		ModeRefresh=0;	
-		time_flag &= ~TIME_SEC_FLAG;
+		time.SecFlag=0;
 		UI_Print_Time(&time,DISPLAY_SEC);
 	}
 	
 	// blink decimal point
-	if(time_flag & TIME_HALF_SEC)
+	if(time.HalfSec)
 	{
-		time_flag &= ~TIME_HALF_SEC;
+		time.HalfSec=0;
 		
 		Display[HR_COL+1]&=~SEP_SEG;
 		
@@ -96,10 +96,10 @@ void DisplayClock(void)
 
 void DisplayDate(void)
 {
-	if(ModeRefresh||(time_flag & TIME_SEC_FLAG))
+	if(ModeRefresh||time.SecFlag)
 	{
 		ModeRefresh=0;
-		time_flag &= ~TIME_SEC_FLAG;
+		time.SecFlag=0;
 		
 		UI_Print_Date(&time);
 
