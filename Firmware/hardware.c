@@ -144,7 +144,7 @@ void PowerDetect(void)
 	{
 		SPI->DR = Display[Display_Col];
 		
-		// Move here as pool neededa delay to flush pipeline
+		// Move here as pool needed a delay to flush pipeline
 		SPI_PORT->ODR &= ~SPI_LE;		
 	
 		while(SPI->SR & SPI_SR_BSY)

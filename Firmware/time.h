@@ -36,7 +36,8 @@ typedef struct
 	uint8_t	month;
 	uint16_t year;
 	uint8_t dayofweek;
-	
+
+	// flags
 	uint8_t Tick:1;
 	uint8_t LeapYear:1;
 	uint8_t SecFlag:1;
@@ -62,10 +63,9 @@ typedef struct
 } nv_setting_t;
 
 extern volatile rtc_t time;
+
 //extern volatile uint16_t countdown;
 //extern volatile nv_setting_t Setting;
-
-
 
 // North America DST
 // https://www.timetemperature.com/northamerica/north_america_daylight_saving_time.shtml
@@ -90,6 +90,8 @@ void DST_Check(void);
 void RTC_SetTime(uint8_t Hour, uint8_t Min, uint8_t Sec);
 void RTC_SetDate(uint8_t Day, uint8_t Month, uint16_t Year);
 
+void DST_FixState(void);
+
 // TIM: 12MHz/(20*60000) = 10Hz, 100ms
 
 #define TIM1_PRESCALER		(CPU_CLOCK/TIM1_RELOAD/TIM1_TICKS)
@@ -104,17 +106,12 @@ void RTC_SetDate(uint8_t Day, uint8_t Month, uint16_t Year);
 #define DDS_MASK					(DDS_CARRY -1UL)
 
 #define DDS_INC						(DDS_CARRY * TICKS_PER_SEC)/TIM1_TICKS
-#define DDS_Adj						-2598UL  // 2602: very close.  2612, 2650: slow 2575,2593: fast 
+#define DDS_Adj						-2595UL  // 2602: very close.  2612, 2650, 2598: slow 2575,2593: fast 
 
 #define TIM1_PSCR_H				((TIM1_PRESCALER-1) >> 8)
 #define TIM1_PSCR_L				((TIM1_PRESCALER-1) & 0xff)
 
 #define TIME_HR_MAX				23
 #define TIME_HR_MIN				0
-
-enum TimeFlagBits
-{
-	TIME_SEC_FLAG = 0x01,TIME_HALF_SEC = 0x02,TIME_FULL_SEC = 0x04,TIME_TICK = 0x08
-};
 
 #endif

@@ -39,12 +39,6 @@ const UI_Menu_t TimeSetMenu =
 	NULL,0,Time_Setting,sizeof(Time_Setting)/sizeof(UI_Item_t)
 };
 
-#define CENTURY					2000
-
-#define S_DAY_COL				0
-#define S_MONTH_COL			2
-#define S_YEAR_COL			4
-
 // date: WW.DD.MM
 const UI_Item_t Date_Setting[]=
 {
