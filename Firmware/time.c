@@ -220,7 +220,7 @@ int32_t DST_CmpTime(void)
 
 // fix up DST state after time/data change
 void DST_FixState(void)
-{	uint8_t cmp;
+{	int16_t cmp;
 
 	cmp=DST_CmpDates(DST_Start_Month,time.DST_Start);
 
@@ -235,7 +235,7 @@ void DST_FixState(void)
 		if(cmp<0)							// < DST end date
 			time.DST_Active = 1;
 		else if(cmp==0)				// == DST end date
-			time.DST_Active = (DST_CmpTime()< 0);
+			time.DST_Active = (DST_CmpTime()< 0L);
 		else									// > DST end date
 			time.DST_Active = 0;
 	}
