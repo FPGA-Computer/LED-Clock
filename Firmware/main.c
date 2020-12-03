@@ -37,10 +37,15 @@ void main(void)
 		if(!debugger)
 			wfi();				// save some extra power - doesn't work with debugger
 			
-		if((time.Tick)&& power)
+		if(power)
 		{
-			time.Tick=0;
-			ClockApp();
+			if(time.Tick) 
+			{
+				time.Tick=0;
+				ClockApp();
+			}			
 		}
+		else
+		  PowerDetect();
 	}
 }

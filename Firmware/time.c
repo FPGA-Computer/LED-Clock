@@ -158,7 +158,7 @@ void RTC_AnnualUpdate(void)
 }
 
 // months starts at 1
-const uint8_t MonthDays_Tbl[]= { 0,31,28,31,30,31,30,31,31,30,31,30 };
+const uint8_t MonthDays_Tbl[]= { 0,31,28,31,30,31,30,31,31,30,31,30,31 };
 
 uint8_t MonthDays(uint8_t month, uint16_t year)
 {

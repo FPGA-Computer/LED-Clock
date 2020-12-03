@@ -54,6 +54,13 @@ enum _CC_DRV
 	CC6=PD3,CC5_PORT=GPIOD_BaseAddress
 };
 
+// CPU divider = 1
+//#define CPU_DIV					0		
+// CPU divider = 16 -> 750kHz
+#define CPU_DIV					0x04
+// CPU divider = 128 -> 93.75kHz
+#define CPU_SLOW				0x07
+
 #define GPIO(X)					((GPIO_TypeDef *)(X))
 
 #define PA_COLS					(CC4)
@@ -129,4 +136,5 @@ extern const uint8_t CharMap[];
 void Init_Hardware(void);
 void Update(void);
 uint8_t Key_Scan(void);
+void PowerDetect(void);
 #endif

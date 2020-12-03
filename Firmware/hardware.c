@@ -24,7 +24,7 @@
 #include "hardware.h"
 
 volatile uint8_t Display_Col,tick,update,power,debugger;
-volatile uint8_t Display[COLUMN_MAX];
+volatile uint8_t Display[COLUMN_MAX+1];
 
 const uint8_t CharMap[] =
 {	
@@ -60,8 +60,7 @@ void Init_Hardware(void)
 	while(CLK->SWCR & CLK_SWCR_SWBSY)
 	  /* */ ;
 	
-	// Clk divider, CPU divider = 1
-	CLK->CKDIVR = 0;
+	CLK->CKDIVR = CPU_DIV;
 
 	Display_Col =0;
 	ColDrv = ColumnDrv;
@@ -126,9 +125,34 @@ uint8_t Key_Scan(void)
 
 void PowerDetect(void)
 {
+	uint8_t detect;
+	
 	GPIOC->DDR &= ~CC1;
-	power = (GPIOC->IDR & CC1);
+	detect = (GPIOC->IDR & CC1);
 	GPIOC->DDR |= CC1;
+	
+	if(power!=detect)		// detect a power change
+	{
+		if(detect)				// power returns
+		{
+			// enable timer 4
+			TIM4->CR1 = TIM4_CR1_CEN;
+			CLK->CKDIVR = CPU_DIV;
+		}
+		else
+		{
+			// disable timer 4 - display refresh, key scan disabled			
+			TIM4->CR1 = 0;
+			
+			// Disable all columns
+			GPIOA->ODR |= PA_COLS;
+			GPIOC->ODR |= PC_COLS;
+			GPIOD->ODR |= PD_COLS;
+			
+			CLK->CKDIVR = CPU_SLOW;
+		}
+		power = detect;
+	}
 }
 
 // display update + scan keys

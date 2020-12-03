@@ -258,7 +258,7 @@ uint8_t UI_EditItem(UI_Item_t *Item)
 			Update = 0;
 		}
 			
-	} while (!Quit);
+	} while (!Quit && power);
 
 	Key_Purge();
 	return(Changed);
@@ -340,7 +340,7 @@ uint8_t UI_Menu(UI_Menu_t *Menu)
 			}	
 		}
 	
-	} while (!Quit);
+	} while (!Quit && power);
 	
 	Key_Purge();
 	UI_Fill(0,0,COLUMN_MAX);

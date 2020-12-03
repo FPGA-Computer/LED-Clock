@@ -106,7 +106,8 @@ void DST_FixState(void);
 #define DDS_MASK					(DDS_CARRY -1UL)
 
 #define DDS_INC						(DDS_CARRY * TICKS_PER_SEC)/TIM1_TICKS
-#define DDS_Adj						-2595UL  // 2602: very close.  2612, 2650, 2598: slow 2575,2593: fast 
+
+#define DDS_Adj						-2609UL  // 2602: very close.  slow: -2612, -2650, -2598 fast: -2575,-2593, -2606UL
 
 #define TIM1_PSCR_H				((TIM1_PRESCALER-1) >> 8)
 #define TIM1_PSCR_L				((TIM1_PRESCALER-1) & 0xff)
