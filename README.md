@@ -15,7 +15,7 @@ efficient new 7 seg display with common cathode ~20mA
 Common anode display/ 
 
 old Alarm clock with recycled vintage large display from cable converter + 2 small displays. ~50mA
-NPN anode drivers is needed.  Smaller display is more efficient, so I adjust their duty cycle in firmware.
+PNP anode drivers is needed.  Smaller display is more efficient, so I adjust their duty cycle in firmware.
 
 Under those 2 directories:
 
