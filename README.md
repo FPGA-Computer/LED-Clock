@@ -8,6 +8,17 @@ oscillator (NCO) in formware for very fine accuracy adjustment.
 Mine has been calibrated to within +/- 1 sec/month 
 (room temperature is regulated by heaters.)
 
+Common cathode/ 
+
+efficient new 7 seg display with common cathode ~20mA
+
+Common anode display/ 
+
+old Alarm clock with recycled vintage large display from cable converter + 2 small displays. ~50mA
+NPN anode drivers is needed.  Smaller display is more efficient, so I adjust their duty cycle in firmware.
+
+Under those 2 directories:
+
 Hardware/ - Eagle CAD schematic, PCB
 
 Firmware/ - STM8S003 firmware source code
@@ -30,3 +41,7 @@ Initial release:
 
 0.2 release
 - added North America Daylight Saving Time (DST) + code clean up
+
+0.3 release
+- code cleanup
+- added AC alarm clock using common anode display. Sorry messy wiring only, so no PCB
