@@ -92,7 +92,7 @@ enum _Display_Options
 
 // UI limits year to 2 digits
 #define CENTURY					2000
-#define YEAR_START			2020
+#define YEAR_START			2021
 
 #define S_DAY_COL				0
 #define S_MONTH_COL			2

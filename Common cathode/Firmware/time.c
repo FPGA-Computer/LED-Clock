@@ -124,7 +124,7 @@ void Time_Init(void)
 	}
 	
 	DDS_Accum &= DDS_MASK;
-	time.Tick = 1;
+	time.Tick = time.SecFlag||time.HalfSec;
 }
 
 /* https://www.wikihow.com/Calculate-Leap-Years */
@@ -150,9 +150,9 @@ void RTC_AnnualUpdate(void)
 			uint8_t dayofweek;
 
 			dayofweek = DayWeek(1,DST_Start_Month,time.year);
-			time.DST_Start = 1+ 7*(DST_Start_Week-1) + dayofweek;
+			time.DST_Start = 1+ 7*(dayofweek?DST_Start_Week:DST_Start_Week-1) - dayofweek;
 			dayofweek = DayWeek(1,DST_End_Month,time.year);
-			time.DST_Stop = 1+ 7*(DST_End_Week-1) + dayofweek;		
+			time.DST_Stop = 1+ 7*(dayofweek?DST_End_Week:DST_End_Week-1) - dayofweek;
 		}
 	#endif		
 }
